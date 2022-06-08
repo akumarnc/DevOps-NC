@@ -1,94 +1,63 @@
-# This workflow installs the latest version of Terraform CLI and configures the Terraform CLI configuration file
-# with an API token for Terraform Cloud (app.terraform.io). On pull request events, this workflow will run
-# `terraform init`, `terraform fmt`, and `terraform plan` (speculative plan via Terraform Cloud). On push events
-# to the "main" branch, `terraform apply` will be executed.
-#
-# Documentation for `hashicorp/setup-terraform` is located here: https://github.com/hashicorp/setup-terraform
-#
-# To use this workflow, you will need to complete the following setup steps.
-#
-# 1. Create a `main.tf` file in the root of this repository with the `remote` backend and one or more resources defined.
-#   Example `main.tf`:
-#     # The configuration for the `remote` backend.
-#     terraform {
-#       backend "remote" {
-#         # The name of your Terraform Cloud organization.
-#         organization = "example-organization"
-#
-#         # The name of the Terraform Cloud workspace to store Terraform state files in.
-#         workspaces {
-#           name = "example-workspace"
-#         }
-#       }
-#     }
-#
-#     # An example resource that does nothing.
-#     resource "null_resource" "example" {
-#       triggers = {
-#         value = "A example resource that does nothing!"
-#       }
-#     }
-#
-#
-# 2. Generate a Terraform Cloud user API token and store it as a GitHub secret (e.g. TF_API_TOKEN) on this repository.
-#   Documentation:
-#     - https://www.terraform.io/docs/cloud/users-teams-organizations/api-tokens.html
-#     - https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets
-#
-# 3. Reference the GitHub secret in step using the `hashicorp/setup-terraform` GitHub Action.
-#   Example:
-#     - name: Setup Terraform
-#       uses: hashicorp/setup-terraform@v1
-#       with:
-#         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+# This workflow is triggered when a pull request is created for 'main' branch and performs a terraform plan so the 
+# changes and be reviewed and approved before terraform apply workflow is executed for azure resource provisioning.
+# This workflow installs the latest version of Terraform CLI and configures the Terraform CLI configuration file.
+# On pull request events, this workflow will run `terraform init`, `terraform workspace select`, `terraform fmt`, 
+# `terraform validate` and `terraform plan` 
 
-name: 'Terraform'
 
+name: Terraform Plan
+
+# Controls when the workflow will run
 on:
-  push:
-    branches:
-    - "main"
   pull_request:
+    branches: [ main ]
 
-permissions:
-  contents: read
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  terraform:
-    name: 'Terraform'
+
+  # This workflow contains a single job called "terraform"
+  terraform-plan:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    environment: production
+    name: 'Terraform Plan'
+    env:
+      AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
+      DEPLOYMENT_ENV: dev #(options can be 'dev','test','prod') 
 
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checkout the repository to the GitHub Actions runner
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    # Display the Pipeline activity to be performed
+    - name: Windows VM Terraform Plan
+      run: echo Windows VM Terraform Plan in respective environment
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token.
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
-      with:
-        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    # Initialize Terraform working directory by creating initial files and loading remote state.
     - name: Terraform Init
       run: terraform init
+      
+    # Switch the terraform workspace to specific environment, for executing plan on respective state file.
+    - name: Terraform switch to environment (dev, qa, prod) workspace
+      run: terraform workspace select $DEPLOYMENT_ENV
 
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
-      run: terraform fmt -check
+      run: terraform fmt
+    
+    # Checks the correctioness of all Terraform files syntax
+    - name: Terraform Validate
+      run: terraform validate
 
-    # Generates an execution plan for Terraform
+    # Generate the report on what would be deployed using Terraform Plan on respective environment
     - name: Terraform Plan
-      run: terraform plan -input=false
-
-      # On push to "main", build or change infrastructure according to Terraform configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
+      run: terraform plan -var-file $DEPLOYMENT_ENV/$DEPLOYMENT_ENV.tfvars -out=tfplan
+    
