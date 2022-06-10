@@ -40,11 +40,15 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
     
-    - name: Login via Az module
-      uses: azure/login@v1
-      with:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
-        enable-AzPSSession: true
+    # Login to Azure using Service principal
+    - name: Login to Azure using Service principal
+      run: az login --service-principal -u ${{secrets.AZURE_CLIENTID}} -p ${{secrets.AZURE_CLIENTSECRET}} --tenant ${{secrets.AZURE_TENANTID}}
+
+    # - name: Login via Az module
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{secrets.AZURE_CREDENTIALS}}
+    #     enable-AzPSSession: true
     
     # Initialize Terraform working directory by creating initial files and loading remote state.
     - name: Terraform Init
