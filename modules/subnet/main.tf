@@ -8,9 +8,9 @@
     .NOTES
         Version: 0.1
         Created By: Anil Kumar
-        Creation Date: 17 May 2022
+        Creation Date: 15 June 2022
         Modified By: Anil Kumar
-        Modified Date: 17 May 2022
+        Modified Date: 16 June 2022
 */
 
 resource "azurerm_subnet" "subnet" {

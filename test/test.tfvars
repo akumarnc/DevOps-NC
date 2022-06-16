@@ -1,4 +1,4 @@
-increment                     = "002"
+increment                     = "003"
 environment                   = "test"
 vmsize                        = "standard_f2s_v2"
 vmimagesku                    = "2019-Datacenter"

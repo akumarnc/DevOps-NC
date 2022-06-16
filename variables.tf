@@ -5,7 +5,7 @@ variable "applicationname" {
 
 variable "increment" {
   type        = string
-  description = "The number to postfix in resource names."
+  description = "The increment number to be postfixed in the resource name."
 }
 
 variable "environment" {

@@ -2,7 +2,7 @@
 # changes and be reviewed and approved before terraform apply workflow is executed for azure resource provisioning.
 # This workflow installs the latest version of Terraform CLI and configures the Terraform CLI configuration file.
 # On pull request events, this workflow will run `terraform init`, `terraform workspace select`, `terraform fmt`, 
-# `terraform validate` and `terraform plan` 
+# `terraform validate` and `terraform plan`  
 
 
 name: Terraform Plan
