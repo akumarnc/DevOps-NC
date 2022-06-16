@@ -19,8 +19,8 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-  DEPLOYMENT_ENV: dev #(options can be 'dev','test','prod') 
   AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
+  DEPLOYMENT_ENV: dev #(options can be 'dev','test','prod') 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
