@@ -29,7 +29,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
-      DEPLOYMENT_ENV: prod #(options are 'dev','test','prod') 
+      DEPLOYMENT_ENV: dev #(options are 'dev','test','prod') 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
