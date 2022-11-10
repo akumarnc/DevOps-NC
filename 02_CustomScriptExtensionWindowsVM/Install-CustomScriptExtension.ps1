@@ -119,7 +119,7 @@ try {
 
                 $sourceUploadFolderPath = "$repoRelativeUrl/02_CustomScriptExtensionWindowsVM/Scripts"
 
-                $file_name = "CIS_WindowsServer2019_v130_AllModules.ps1"
+                $file_name = "Logging_Settings_AllModules.ps1"
                     
                     
                 # Step 1: Call the 'CreateStorage' PS module for creating storage account the VM
@@ -136,21 +136,21 @@ try {
                         $nsgInternetRuleName = $nsgInternetRuleNamePrefix+'-'+$vm_name
                         $nsgAzureCloudRuleName = $nsgAzureCloudRuleNamePrefix+'-'+$vm_name
 
-                        # If $networkSecurityRuleType = 1, then network security rule is added
-                        $networkSecurityRuleType = 1
-                        $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
-                        if(!($null -eq $networkSecurityRuleCreationStatus)) {
+                        # # If $networkSecurityRuleType = 1, then network security rule is added
+                        # $networkSecurityRuleType = 1
+                        # $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
+                        # if(!($null -eq $networkSecurityRuleCreationStatus)) {
                         
-                            Write-Host "Status of Network Security Rule Creation :" $networkSecurityRuleCreationStatus
+                           # Write-Host "Status of Network Security Rule Creation :" $networkSecurityRuleCreationStatus
 
-                            # Step 5: Call the 'ModifyServiceEndPoints' PS module for adding / configuring service endpoints
-                            # If $-serviceEndPointsRuleCleanup = 0, then service endpoint is added / configured
-                            $PreExistingServiceEndPoints = ModifyServiceEndPoints -vmName $vm_name -vmResourceGroupName $vm_resource_group_name -vmRGLocation $vm_rg_location -tempStorageAccount $storageAccountName -tempStorageAccountRGName $rgNameStorageAccount -serviceEndPointsRuleCleanup 0
-                            #Write-Host "Added / Configured Microsoft.Storage service endpoints for hardening script execution"
+                            # # Step 5: Call the 'ModifyServiceEndPoints' PS module for adding / configuring service endpoints
+                            # # If $-serviceEndPointsRuleCleanup = 0, then service endpoint is added / configured
+                            # $PreExistingServiceEndPoints = ModifyServiceEndPoints -vmName $vm_name -vmResourceGroupName $vm_resource_group_name -vmRGLocation $vm_rg_location -tempStorageAccount $storageAccountName -tempStorageAccountRGName $rgNameStorageAccount -serviceEndPointsRuleCleanup 0
+                            # #Write-Host "Added / Configured Microsoft.Storage service endpoints for hardening script execution"
 
-                            #Write-Host "Pre-existing Service Endpoints string :" $PreExistingServiceEndPoints
+                            # #Write-Host "Pre-existing Service Endpoints string :" $PreExistingServiceEndPoints
 
-                            if(!($null -eq $PreExistingServiceEndPoints)) {
+                            # if(!($null -eq $PreExistingServiceEndPoints)) {
 
 
                                 # Step 6: Call the 'Custom Script Extension' command on the VM for hardening
@@ -194,43 +194,43 @@ try {
                                 catch {
                                     Write-Error 'Error in executing Custom Script Extension for VM ' $vm_name ' :'  $_.Exception.Message
                                 }
-                            }
-                            else {
-                                Write-Host "Pre-existing service endpoints is null"
-                                Write-Host "Error in configuring Service Endpoint for the VM $vm_name and Storage Account $storageAccountName"
-                            }
-                        }
-                        else {
-                            Write-Host 'Error creating Network Security Rule to Deny outbound internet. Hardeining failed for VM :' $vm_name
-                        }
+                            # }
+                            # else {
+                            #     Write-Host "Pre-existing service endpoints is null"
+                            #     Write-Host "Error in configuring Service Endpoint for the VM $vm_name and Storage Account $storageAccountName"
+                            # }
+                        # }
+                        # else {
+                        #     Write-Host 'Error creating Network Security Rule to Deny outbound internet. Hardeining failed for VM :' $vm_name
+                        # }
 
-                        # Step 7: Remove the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
-                        # If $networkSecurityRuleType = 0, then network security rule is removed
-                        $networkSecurityRuleType = 0
-                        $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
-                        Write-Host "Status of Network Security Removal :" $networkSecurityRuleDeletionStatus
+                        # # Step 7: Remove the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
+                        # # If $networkSecurityRuleType = 0, then network security rule is removed
+                        # $networkSecurityRuleType = 0
+                        # $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
+                        # Write-Host "Status of Network Security Removal :" $networkSecurityRuleDeletionStatus
 
-                        # Step 8: Call the 'ModifyServiceEndPoints' PS module for rollback (deleting/cleanup) of service endpoint added via this workflow / script
-                        # If $-serviceEndPointsRuleCleanup = 1, then service endpoint is rolled-back / deleted / cleaned.
-                        # $PreExistingServiceEndPoints object conatin the list of service endpoinst which needs to be rolled-back
+                        # # Step 8: Call the 'ModifyServiceEndPoints' PS module for rollback (deleting/cleanup) of service endpoint added via this workflow / script
+                        # # If $-serviceEndPointsRuleCleanup = 1, then service endpoint is rolled-back / deleted / cleaned.
+                        # # $PreExistingServiceEndPoints object conatin the list of service endpoinst which needs to be rolled-back
 
-                        $storageServiceEndpointsExists = $false
-                        foreach ($PreExistingServiceEndPoint in $PreExistingServiceEndPoints) {
-                            Write-Host "Pre-existing Service Endpoint Name received in main CSE script :" $PreExistingServiceEndPoint.Service
-                            if('Microsoft.Storage' -eq $PreExistingServiceEndPoint.Service){
-                                $storageServiceEndpointsExists = $true
-                                break;
-                            }
-                        }
+                        # $storageServiceEndpointsExists = $false
+                        # foreach ($PreExistingServiceEndPoint in $PreExistingServiceEndPoints) {
+                        #     Write-Host "Pre-existing Service Endpoint Name received in main CSE script :" $PreExistingServiceEndPoint.Service
+                        #     if('Microsoft.Storage' -eq $PreExistingServiceEndPoint.Service){
+                        #         $storageServiceEndpointsExists = $true
+                        #         break;
+                        #     }
+                        # }
 
-                        # Code to call the ModifyServiceEndPoints module for rollback of service endpoints, only if modification were done as part of this workflow / script
-                        if($false -eq $storageServiceEndpointsExists) {
-                            Write-Host "Calling ModifyServiceEndPoints module to rollback service endpoints as it added Microsoft.Storage"
-                            ModifyServiceEndPoints -vmName $vm_name -vmResourceGroupName $vm_resource_group_name -vmRGLocation $vm_rg_location -tempStorageAccount $storageAccountName -tempStorageAccountRGName $rgNameStorageAccount -serviceEndPointsRuleCleanup 1 -exitingServiceEndpoints $PreExistingServiceEndPoints
-                        }
-                        else {
-                            Write-Host "Not calling ModifyServiceEndPoints module to rollback as Microsoft.Storage service endpoints already existed"
-                        }
+                        # # Code to call the ModifyServiceEndPoints module for rollback of service endpoints, only if modification were done as part of this workflow / script
+                        # if($false -eq $storageServiceEndpointsExists) {
+                        #     Write-Host "Calling ModifyServiceEndPoints module to rollback service endpoints as it added Microsoft.Storage"
+                        #     ModifyServiceEndPoints -vmName $vm_name -vmResourceGroupName $vm_resource_group_name -vmRGLocation $vm_rg_location -tempStorageAccount $storageAccountName -tempStorageAccountRGName $rgNameStorageAccount -serviceEndPointsRuleCleanup 1 -exitingServiceEndpoints $PreExistingServiceEndPoints
+                        # }
+                        # else {
+                        #     Write-Host "Not calling ModifyServiceEndPoints module to rollback as Microsoft.Storage service endpoints already existed"
+                        # }
 
                     }
                     else {
