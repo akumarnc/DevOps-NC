@@ -30,7 +30,7 @@ env:
 
   # Update this to execute respective terraform IaC template using this reusable GitHub Actions workflow.
   # Example './IaC/Win-VM-Provisioning'
-  SOLUTION_FOLDER_PATH: ./IaC/Win-VM-Provisioning 
+  SOLUTION_FOLDER_PATH: ./IaC/Win-VM-Provisioning
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -95,7 +95,7 @@ jobs:
 
     # Switch the terraform workspace to specific environment, for executing plan on respective state file.
     - name: Terraform switch to environment (dev, qa, prod) workspace
-      run: terraform -chdir=$SOLUTION_FOLDER_PATH workspace select $DEPLOYMENT_ENV
+      run: terraform -chdir=$SOLUTION_FOLDER_PATH workspace select $TERRAFORM_DEPLOYMENT_WORKSPACE
 
     - name: Terraform Destroy (ONLY during development)
-      run: terraform -chdir=$SOLUTION_FOLDER_PATH destroy -auto-approve
+      run: terraform destroy -auto-approve
