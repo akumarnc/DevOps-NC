@@ -29,11 +29,6 @@ variable "vmadminusername" {
   description = "The name of the admin user for the azure windows virtual machine."
 }
 
-variable "vmadminuserpassword" {
-  type        = string
-  description = "The password of the admin user for the azure windows virtual machine."
-}
-
 variable "vmimagepublisher" {
   type        = string
   description = "The image publisher of the azure windows virtual machine."

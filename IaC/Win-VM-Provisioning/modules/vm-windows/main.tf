@@ -13,13 +13,20 @@
         Modified Date: 16 June 2022
 */
 
+resource "random_password" "password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+
 resource "azurerm_windows_virtual_machine" "windowsvm" {
   name                = var.vmname
   location            = var.location
   resource_group_name = var.resourcegroupname
   size                = var.vmsize
   admin_username      = var.vmadminusername
-  admin_password      = var.vmadminuserpassword 
+  admin_password      = random_password.password.result 
   network_interface_ids = [
     var.networkinterfaceid
   ]
