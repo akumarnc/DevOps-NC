@@ -1,28 +1,21 @@
 # .SYNOPSIS
-#       GitHub Action Workflow for Hardening Windows Virtual Machine server.
+#       GitHub Action Workflow to trigger Custom Script Extension on Windows VM.
 # .DESCRIPTION
-#       Github Action workflow for executing Hardening script for Windows VM (2016, 2019 & 2022 SKUs) via Custom Extension Script.
-#       This solution performs below tasks for hardening the Windows Virtual Machine server:
-#         a.) Triggers Hardening Github action workflow on 'push' to 'main' branch
-#         b.) Secure string in GitHub action workflow is stored & fetched from GitHub Secrets
-#         c.) The GitHub action workflow triggers the main 'CIS_WindowsServer_Hardening_InstallCEx.ps1' hardening script.
-#             'CIS_WindowsServer_Hardening_InstallCEx.ps1' is the main script which triggers all other modular scripts for all VMs in loop.
-#         e.) The GitHub action workflow triggers the script/action to delete all installed 'Custom Script Extension' on each VM
-#         f.) The GitHub action workflow triggers the script/action to delete the temporary resource group
-#   .NOTES
-#       Version: 0.2
+#       GitHub Action Workflow to trigger Custom Script Extension on Windows VM.
+# .NOTES
+#       Version: 0.1
 #       Created By: Anil Kumar
 #       Creation Date: 25 May 2022
 #       Modified By: Anil Kumar
 #       Modified Date: 10 Aug 2022
 
-name: Hardening Windows Server Virtual Machine 
+name: Trigger Custom Script Extension Windows VM
 
 # Controls when the workflow will run
 on:
   #Triggers the workflow on push for the main branch
   push:
-    branches: [ main ]
+    branches: [ GitHubActions-ParallelJobs ]
   
   # Enables the setting to run this workflow manually from the Github Actions tab in browser
   workflow_dispatch:
@@ -63,7 +56,7 @@ jobs:
         id: hardeningstep
         with:
           inlineScript: |
-            ./CIS_WindowsServer_Hardening_InstallCEx.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineLocation ${{ matrix.vm['location'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -storageAccountNamePrefix ${{ env.STORAGE_ACCOUNT_NAME_PREFIX }} -storageContainerNamePrefix ${{ env.STORAGE_CONTAINER_NAME_PREFIX }} -rgNameStorageAccount ${{ env.STORAGE_ACCOUNT_RG_NAME }} -rgLocationStorageAccount ${{ env.STORAGE_ACCOUNT_RG_LOCATION }} -networkSecurityRuleNamePrefix ${{ env.NETWORK_SECURITY_RULE_NAME_PREFIX }} -privateDNSZoneName ${{ env.PRIVATE_DNS_ZONE_NAME }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }}
+            ./02_CustomScriptExtensionWindowsVM/Install-CustomScriptExtension.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineLocation ${{ matrix.vm['location'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -storageAccountNamePrefix ${{ env.STORAGE_ACCOUNT_NAME_PREFIX }} -storageContainerNamePrefix ${{ env.STORAGE_CONTAINER_NAME_PREFIX }} -rgNameStorageAccount ${{ env.STORAGE_ACCOUNT_RG_NAME }} -rgLocationStorageAccount ${{ env.STORAGE_ACCOUNT_RG_LOCATION }} -networkSecurityRuleNamePrefix ${{ env.NETWORK_SECURITY_RULE_NAME_PREFIX }} -privateDNSZoneName ${{ env.PRIVATE_DNS_ZONE_NAME }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }}
           azPSVersion: "latest"
 
       - name: Check temporary RG name returned from PS script
@@ -78,7 +71,7 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            ./CIS_WindowsServer_Hardening_RemoveCEx.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }}
+            ./02_CustomScriptExtensionWindowsVM/Uninstall-CustomScriptExtension.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }}
           azPSVersion: "latest"
       
       - name: Delete Temporary Resource Group (hosting Storage Accounts, Private Endpoints & Private DNS Zone)
@@ -86,5 +79,5 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            ./UtilityScripts/DeleteResourceGroup.ps1 -resourceGroupName ${{ steps.hardeningstep.outputs._rgName }}
+            ./02_CustomScriptExtensionWindowsVM/Common/DeleteResourceGroup.ps1 -resourceGroupName ${{ steps.hardeningstep.outputs._rgName }}
           azPSVersion: "latest"
