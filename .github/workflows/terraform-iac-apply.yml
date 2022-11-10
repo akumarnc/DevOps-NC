@@ -98,4 +98,4 @@ jobs:
       run: terraform -chdir=$SOLUTION_FOLDER_PATH workspace select $TERRAFORM_DEPLOYMENT_WORKSPACE
 
     - name: Terraform Destroy (ONLY during development)
-      run: terraform destroy workspace select $TERRAFORM_DEPLOYMENT_WORKSPACE -auto-approve
+      run: terraform -chdir=$SOLUTION_FOLDER_PATH destroy -auto-approve
