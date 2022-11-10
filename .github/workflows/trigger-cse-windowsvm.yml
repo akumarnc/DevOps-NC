@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        vm: [{"name":"vmctadevwe132", "location":"westeurope", "rg":"rg-cta-dev-we-132"},{"name":"vmctaprodwe017", "location":"westeurope", "rg":"rg-cta-prod-we-017"}]
+        vm: [{"name":"vmncdevwe001", "location":"westeurope", "rg":"rg-nc-dev-we-001"},{"name":"vmnctestwe002", "location":"westeurope", "rg":"rg-nc-test-we-002"}]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
