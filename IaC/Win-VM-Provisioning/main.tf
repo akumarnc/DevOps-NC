@@ -116,7 +116,6 @@ module "virtualmachine-windows" {
   networkinterfaceid         = module.networkinterface._networkinterfaceid
   vmsize                     = var.vmsize
   vmadminusername            = var.vmadminusername
-  vmadminuserpassword        = var.vmadminuserpassword
   vmimagepublisher           = var.vmimagepublisher
   vmimageoffer               = var.vmimageoffer
   vmimagesku                 = var.vmimagesku
