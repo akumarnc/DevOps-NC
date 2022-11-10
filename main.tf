@@ -26,8 +26,8 @@ terraform {
   # Backend setup to maintain Terraform state file
   backend "azurerm" {
     resource_group_name  = "rg-terraformstate"
-    storage_account_name = "stwinvm2019"
-    container_name       = "scwinvm2019"
+    storage_account_name = "stvmprovisioning"
+    container_name       = "win-vm-provisioning"
     key                  = "winvm2019.tfstate"
   }
 }
