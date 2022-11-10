@@ -29,7 +29,17 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
-      DEPLOYMENT_ENV: dev #(options are 'dev','test','prod') 
+      
+      # For creating the resource with correct naming convention based on ALM (application life cycle management), by referring it's correct .tfvars file
+      RESOURCE_ALM_ENV: dev 
+      
+      # Workspaces in the Terraform CLI refer to separate instances of state data inside the same Terraform working directory
+      # Set the name of the Terraform workspace in which resource is being provisioned.
+      TERRAFORM_DEPLOYMENT_WORKSPACE: tfws-dev-vm-win2019server 
+
+      # Update this to execute respective terraform IaC template using this reusable GitHub Actions workflow.
+      # Example './IaC/Win-VM-Provisioning'
+      SOLUTION_FOLDER_PATH: ./IaC/Win-VM-Provisioning
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -53,21 +63,21 @@ jobs:
 
     # Initialize Terraform working directory by creating initial files and loading remote state.
     - name: Terraform Init
-      run: terraform init
+      run: terraform -chdir=$SOLUTION_FOLDER_PATH init
       
-    # Switch the terraform workspace to specific environment, for executing plan on respective state file.
+    # Switch the terraform workspace to specific environment for executing the terraform plan on respective state file.
     - name: Terraform switch to environment (dev, qa, prod) workspace
-      run: terraform workspace select $DEPLOYMENT_ENV
+      run: terraform -chdir=$SOLUTION_FOLDER_PATH workspace select $TERRAFORM_DEPLOYMENT_WORKSPACE
 
-    # Checks that all Terraform configuration files adhere to a canonical format
+    # Checks that all Terraform configuration files within the given folder and sub-folders adhere to a canonical format
     - name: Terraform Format
-      run: terraform fmt
+      run: terraform -chdir=$SOLUTION_FOLDER_PATH fmt -recursive
     
     # Checks the correctioness of all Terraform files syntax
     - name: Terraform Validate
-      run: terraform validate
+      run: terraform -chdir=$SOLUTION_FOLDER_PATH validate
 
     # Generate the report on what would be deployed using Terraform Plan on respective environment
     - name: Terraform Plan
-      run: terraform plan -var-file $DEPLOYMENT_ENV/$DEPLOYMENT_ENV.tfvars -out=tfplan
+      run: terraform -chdir=$SOLUTION_FOLDER_PATH plan -var-file $RESOURCE_ALM_ENV/$RESOURCE_ALM_ENV.tfvars -out=tfplan
     
