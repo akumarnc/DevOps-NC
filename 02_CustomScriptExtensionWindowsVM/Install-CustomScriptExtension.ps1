@@ -20,7 +20,8 @@ param (
         $storageContainerNamePrefix,
         $rgNameStorageAccount,
         $rgLocationStorageAccount,
-        $networkSecurityRuleNamePrefix,
+        $nsgInternetRuleNamePrefix,
+        $nsgAzureCloudRuleNamePrefix,
         $repoRelativeUrl,
         $cseName
 )
