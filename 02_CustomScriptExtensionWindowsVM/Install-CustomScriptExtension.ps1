@@ -90,12 +90,16 @@ try {
 
                 Write-Output 'Custom Script Extension Name received from Pipeline :' $custom_script_extension_name
 
+                #*******************
                 # Generate the names of storage account & storage container dynamically
-                $storageAccountName = $storageAccountNamePrefix+$vm_name+$counterVM
+                $randomNumber = Get-Random
+                $storageAccountName = $storageAccountNamePrefix+$randomNumber+$counterVM
                 $storageAccountName = ($storageAccountName -replace "[^a-zA-Z0-9]").ToLower()
                 
-                $storageContainerName = $storageContainerNamePrefix+'-'+$vm_name+'-'+$counterVM
+                $storageContainerName = $storageContainerNamePrefix+'-'+$randomNumber+'-'+$counterVM
                 $storageContainerName = ($storageContainerName -replace "[^a-zA-Z0-9]").ToLower()
+                #*******************
+
 
                 # Sleep further processing for 15 second as sometimes it says RG not found even though it is created.
                 Start-Sleep -Seconds 15
