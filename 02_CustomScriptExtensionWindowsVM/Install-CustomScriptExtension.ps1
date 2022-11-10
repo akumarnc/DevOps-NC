@@ -21,7 +21,6 @@ param (
         $rgNameStorageAccount,
         $rgLocationStorageAccount,
         $networkSecurityRuleNamePrefix,
-        $privateDNSZoneName,
         $repoRelativeUrl,
         $cseName
 )
@@ -132,13 +131,14 @@ try {
                     if($true -eq $blobUploadStatus) {
                         Write-Host 'Blob Upload Status from module :' $blobUploadStatus
 
-                        # Step 5: Add the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
-                        $networkSecurityRuleName = $networkSecurityRuleNamePrefix+'-'+$vm_name
+                        # Step 4: Add the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
+                        $nsgInternetRuleName = $nsgInternetRuleNamePrefix+'-'+$vm_name
+                        $nsgAzureCloudRuleName = $nsgAzureCloudRuleNamePrefix+'-'+$vm_name
+
                         # If $networkSecurityRuleType = 1, then network security rule is added
                         $networkSecurityRuleType = 1
-                        $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -networkSecurityRuleName $networkSecurityRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
-
-                        if($true -eq $networkSecurityRuleCreationStatus) {
+                        $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
+                        if(!($null -eq $networkSecurityRuleCreationStatus)) {
                         
                             Write-Host "Status of Network Security Rule Creation :" $networkSecurityRuleCreationStatus
 
@@ -193,11 +193,6 @@ try {
                                 catch {
                                     Write-Error 'Error in executing Custom Script Extension for VM ' $vm_name ' :'  $_.Exception.Message
                                 }
-
-                                # Delete the Storage Account to avoid reserving the IP address in the VM's subnet due to Storage Account Private EndPoint
-                                # Thus Deleting the Storage Account after each VM's hardening
-                                Write-Host "Deleting the temporary Storage Account $storageAccountName used for hardening the VM $vm_name"
-                                Remove-AzStorageAccount -ResourceGroupName $rgNameStorageAccount -Name $storageAccountName -Force
                             }
                             else {
                                 Write-Host "Pre-existing service endpoints is null"
@@ -207,6 +202,35 @@ try {
                         else {
                             Write-Host 'Error creating Network Security Rule to Deny outbound internet. Hardeining failed for VM :' $vm_name
                         }
+
+                        # Step 7: Remove the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
+                        # If $networkSecurityRuleType = 0, then network security rule is removed
+                        $networkSecurityRuleType = 0
+                        $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
+                        Write-Host "Status of Network Security Removal :" $networkSecurityRuleDeletionStatus
+
+                        # Step 8: Call the 'ModifyServiceEndPoints' PS module for rollback (deleting/cleanup) of service endpoint added via this workflow / script
+                        # If $-serviceEndPointsRuleCleanup = 1, then service endpoint is rolled-back / deleted / cleaned.
+                        # $PreExistingServiceEndPoints object conatin the list of service endpoinst which needs to be rolled-back
+
+                        $storageServiceEndpointsExists = $false
+                        foreach ($PreExistingServiceEndPoint in $PreExistingServiceEndPoints) {
+                            Write-Host "Pre-existing Service Endpoint Name received in main CSE script :" $PreExistingServiceEndPoint.Service
+                            if('Microsoft.Storage' -eq $PreExistingServiceEndPoint.Service){
+                                $storageServiceEndpointsExists = $true
+                                break;
+                            }
+                        }
+
+                        # Code to call the ModifyServiceEndPoints module for rollback of service endpoints, only if modification were done as part of this workflow / script
+                        if($false -eq $storageServiceEndpointsExists) {
+                            Write-Host "Calling ModifyServiceEndPoints module to rollback service endpoints as it added Microsoft.Storage"
+                            ModifyServiceEndPoints -vmName $vm_name -vmResourceGroupName $vm_resource_group_name -vmRGLocation $vm_rg_location -tempStorageAccount $storageAccountName -tempStorageAccountRGName $rgNameStorageAccount -serviceEndPointsRuleCleanup 1 -exitingServiceEndpoints $PreExistingServiceEndPoints
+                        }
+                        else {
+                            Write-Host "Not calling ModifyServiceEndPoints module to rollback as Microsoft.Storage service endpoints already existed"
+                        }
+
                     }
                     else {
                         Write-Host 'Error uploading scripts to storage account for vm :' $vm_name 
