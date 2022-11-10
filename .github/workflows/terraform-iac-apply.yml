@@ -22,11 +22,11 @@ env:
   AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
 
   # For creating the resource with correct naming convention based on ALM (application life cycle management), by referring it's correct .tfvars file
-  RESOURCE_ALM_ENV: dev 
+  RESOURCE_ALM_ENV: test 
   
   # Workspaces in the Terraform CLI refer to separate instances of state data inside the same Terraform working directory
   # Set the name of the Terraform workspace in which resource is being provisioned.
-  TERRAFORM_DEPLOYMENT_WORKSPACE: tfws-dev-vm-win2019server 
+  TERRAFORM_DEPLOYMENT_WORKSPACE: tfws-test-vm-win2019server 
 
   # Update this to execute respective terraform IaC template using this reusable GitHub Actions workflow.
   # Example './IaC/Win-VM-Provisioning'
