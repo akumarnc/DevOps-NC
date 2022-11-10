@@ -241,11 +241,11 @@ try {
                     Write-Host 'Error creating temporary storage account. Hardeining failed for VM :' $vm_name 
                 }
 
-                # Step 7: Remove the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
-                # If $networkSecurityRuleType = 0, then network security rule is removed
-                $networkSecurityRuleType = 0
-                $networkSecurityRuleDeletionStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -networkSecurityRuleName $networkSecurityRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
-                Write-Host "Status of Network Security Removal :" $networkSecurityRuleDeletionStatus
+                # # Step 7: Remove the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
+                # # If $networkSecurityRuleType = 0, then network security rule is removed
+                # $networkSecurityRuleType = 0
+                # $networkSecurityRuleDeletionStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -networkSecurityRuleName $networkSecurityRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
+                # Write-Host "Status of Network Security Removal :" $networkSecurityRuleDeletionStatus
                 
                 Write-Host "##############################################################################################################################"
                 #Write-Host "END: Executing Hardening for VM :" $virtualMachines.VMs.VM[$counterVM].Name
