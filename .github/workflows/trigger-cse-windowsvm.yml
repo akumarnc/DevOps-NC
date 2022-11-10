@@ -29,6 +29,7 @@ env:
   NETWORK_SECURITY_RULE_NAME_PREFIX: Deny-Out-Internet
   PRIVATE_DNS_ZONE_NAME: 'privatelink.blob.core.windows.net'
   CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX: 'cse-harden-'
+  REPO_RELATIVE_URL:  '../DevOps-NC' # Update with the relative URL of your forked repo
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -56,7 +57,7 @@ jobs:
         id: hardeningstep
         with:
           inlineScript: |
-            ./02_CustomScriptExtensionWindowsVM/Install-CustomScriptExtension.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineLocation ${{ matrix.vm['location'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -storageAccountNamePrefix ${{ env.STORAGE_ACCOUNT_NAME_PREFIX }} -storageContainerNamePrefix ${{ env.STORAGE_CONTAINER_NAME_PREFIX }} -rgNameStorageAccount ${{ env.STORAGE_ACCOUNT_RG_NAME }} -rgLocationStorageAccount ${{ env.STORAGE_ACCOUNT_RG_LOCATION }} -networkSecurityRuleNamePrefix ${{ env.NETWORK_SECURITY_RULE_NAME_PREFIX }} -privateDNSZoneName ${{ env.PRIVATE_DNS_ZONE_NAME }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }}
+            ./02_CustomScriptExtensionWindowsVM/Install-CustomScriptExtension.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineLocation ${{ matrix.vm['location'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -storageAccountNamePrefix ${{ env.STORAGE_ACCOUNT_NAME_PREFIX }} -storageContainerNamePrefix ${{ env.STORAGE_CONTAINER_NAME_PREFIX }} -rgNameStorageAccount ${{ env.STORAGE_ACCOUNT_RG_NAME }} -rgLocationStorageAccount ${{ env.STORAGE_ACCOUNT_RG_LOCATION }} -networkSecurityRuleNamePrefix ${{ env.NETWORK_SECURITY_RULE_NAME_PREFIX }} -privateDNSZoneName ${{ env.PRIVATE_DNS_ZONE_NAME }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }} -repoRelativeUrl ${{ env.REPO_RELATIVE_URL }}
           azPSVersion: "latest"
 
       - name: Check temporary RG name returned from PS script

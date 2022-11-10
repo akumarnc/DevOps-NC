@@ -22,6 +22,7 @@ param (
         $rgLocationStorageAccount,
         $networkSecurityRuleNamePrefix,
         $privateDNSZoneName,
+        $repoRelativeUrl,
         $cseName
 )
 
@@ -35,6 +36,9 @@ Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/ModifyServic
 Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/IdentifyVirtualMachineOSName.psm1
 
 Write-Host "Custom Script Extension processed a request"
+
+Write-Host "Relative Repo Url : " $repoRelativeUrl
+
 
 $vm_name                        = $null;
 $vm_resource_group_name         = $null;
@@ -50,9 +54,10 @@ Write-Host 'Upload Source Path for Scripts :' $sourceUploadFolderPath
 Write-Host "Variable initialization complete"
 
 try {
-    if(!($null -eq $virtualMachineName)) {
-
-        
+    if(
+        !($null -eq $virtualMachineName) -and
+        !($null -eq $repoRelativeUrl)
+    ) {
         Write-Host "VM name received from pipeline :" $virtualMachineName
         Write-Host "VM location received from pipeline :" $virtualMachineLocation
         Write-Host "VM resource group received from pipeline :" $virtualMachineResourceGroup
@@ -112,7 +117,8 @@ try {
                     "https://$storageAccountName.blob.core.windows.net/$storageContainerName/ComputerManagementDsc.zip"
                     );
 
-                $sourceUploadFolderPath = '../02_CustomScriptExtensionWindowsVM/Scripts'
+                $sourceUploadFolderPath = "$repoRelativeUrl/02_CustomScriptExtensionWindowsVM/Scripts"
+
                 $file_name = "CIS_WindowsServer2019_v130_AllModules.ps1"
                     
                     

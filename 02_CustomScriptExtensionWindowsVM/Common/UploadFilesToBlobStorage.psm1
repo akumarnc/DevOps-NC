@@ -41,15 +41,15 @@ function UploadFilesToBlobStorage {
 
             # Use the storage SAS token for authentication
             $StorageKey = (Get-AzStorageAccountKey -Name $storageAccountName -ResourceGroupName $rgNameStorageAccount).value[0]
-            #Write-Host 'Upload File Storage Key Length :' $StorageKey.Length
+            Write-Host 'Upload File Storage Key Length :' $StorageKey.Length
 
             # Get storage context, using key as credential
             $ctxStorageAccount = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storagekey
-            #Write-Host 'Upload File Storage Account Context :' $ctxStorageAccount.StorageAccountName
+            Write-Host 'Upload File Storage Account Context :' $ctxStorageAccount.StorageAccountName
 
             # Create SAS token to the storage container to upload files from GitHub to Blob Storage.
             $sas = New-AzStorageAccountSASToken -Context $ctxStorageAccount -Service Blob,File,Table,Queue -ResourceType Service,Container,Object -Permission $permissions -Protocol $protocol
-            #Write-Host 'Upload File Storage Account SAS Length :' $sas.Length
+            Write-Host 'Upload File Storage Account SAS Length :' $sas.Length
 
             # Loop through all the files within the hardening script folder
             Get-ChildItem –Path $sourceUploadFolderPath |
