@@ -30,9 +30,8 @@ $currentPath = Get-Location
 Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/CreateResourceGroup.psm1
 Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/CreateStorage.psm1
 Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/UploadFilesToBlobStorage.psm1
-Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/CreatePrivateEndPoints.psm1
 Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/ManageNetworkSecurityRules.psm1
-Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/CreatePrivateDNSZone.psm1
+Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/ModifyServiceEndPoints.psm1
 Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/IdentifyVirtualMachineSKU.psm1
 
 Write-Host "Custom Script Extension processed a request"
