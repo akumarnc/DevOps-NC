@@ -24,12 +24,12 @@ param (
 
 #Code to import the PS modules
 $currentPath = Get-Location
-Import-Module $currentPath/Common/CreateResourceGroup.psm1
-Import-Module $currentPath/Common/CreateStorage.psm1
-Import-Module $currentPath/Common/UploadFilesToBlobStorage.psm1
-Import-Module $currentPath/Common/IdentifyVirtualMachineOSName.psm1
-Import-Module $currentPath/Common/ManageNetworkSecurityRules.psm1
-Import-Module $currentPath/Common/ModifyServiceEndPoints.psm1
+Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/CreateResourceGroup.psm1
+Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/CreateStorage.psm1
+Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/UploadFilesToBlobStorage.psm1
+Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/IdentifyVirtualMachineOSName.psm1
+Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/ManageNetworkSecurityRules.psm1
+Import-Module $currentPath/02_CustomScriptExtensionWindowsVM/Common/ModifyServiceEndPoints.psm1
 
 
 Write-Host "Executing Custom Script Extension on Windows Server processed a request"
