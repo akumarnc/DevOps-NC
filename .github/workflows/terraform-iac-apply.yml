@@ -73,8 +73,8 @@ jobs:
     
     runs-on: ubuntu-latest
     name: 'Terraform Destroy'
-    environment: 'ResourceDestroy'
-    needs: terraform-apply
+    #environment: 'ResourceDestroy'
+    #needs: terraform-apply
 
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
