@@ -2,6 +2,11 @@
     "VMs":{
         "VM":[
             { 
+                "Name":"vmnctestwe001",
+                "Location":"westeurope",
+                "RG":"RG-NC-TEST-WE-001"
+            },
+            { 
                 "Name":"vmnctestwe002",
                 "Location":"westeurope",
                 "RG":"RG-NC-TEST-WE-002"
