@@ -2,14 +2,9 @@
     "VMs":{
         "VM":[
             { 
-                "Name":"vmctadevwe001",
+                "Name":"vmnctestwe002",
                 "Location":"westeurope",
-                "RG":"RG-CTA-DEV-WE-001"
-            },
-            { 
-                "Name":"vm2022testwe200",
-                "Location":"westeurope",
-                "RG":"rg-2022-test-we-200"
+                "RG":"RG-NC-TEST-WE-002"
             }
         ]
     }

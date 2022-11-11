@@ -155,7 +155,7 @@ try {
 
                                 # Step 6: Call the 'Custom Script Extension' command on the VM for hardening
                                 Write-Host "******************************************************************************************************************************"
-                                Write-Host "STEP 6: Call the 'Custom Script Extension' command VM hardening"
+                                Write-Host "STEP 4: Call the 'Custom Script Extension' on Windows VM :" $vm_name
                                 Write-Host "******************************************************************************************************************************"
 
                                 Write-Host "Custom Extension Script Name :" $custom_script_extension_name

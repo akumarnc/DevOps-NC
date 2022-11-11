@@ -18,7 +18,7 @@ function CreateResourceGroup {
 
     #Write-Host ""
     Write-Host "******************************************************************************************************************************"
-    Write-Host "Resource Group creation ps module received a request"
+    Write-Host "Step 1: Resource Group creation ps module received a request"
     Write-Host "******************************************************************************************************************************"
 
     Write-Host "RG name received from Pipeline :" $rgName
