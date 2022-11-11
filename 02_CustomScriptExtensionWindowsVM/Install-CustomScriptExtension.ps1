@@ -95,7 +95,6 @@ try {
 
                 Write-Output 'Custom Script Extension Name received from Pipeline :' $custom_script_extension_name
 
-                #*******************
                 # Generate the names of storage account & storage container dynamically
                 $randomNumber = Get-Random
                 $storageAccountName = $storageAccountNamePrefix+$randomNumber+$counterVM
@@ -103,8 +102,6 @@ try {
                 
                 $storageContainerName = $storageContainerNamePrefix+'-'+$randomNumber+'-'+$counterVM
                 $storageContainerName = ($storageContainerName -replace "[^a-zA-Z0-9]").ToLower()
-                #*******************
-
 
                 # Sleep further processing for 15 second as sometimes it says RG not found even though it is created.
                 Start-Sleep -Seconds 15
@@ -136,101 +133,47 @@ try {
                         $nsgInternetRuleName = $nsgInternetRuleNamePrefix+'-'+$vm_name
                         $nsgAzureCloudRuleName = $nsgAzureCloudRuleNamePrefix+'-'+$vm_name
 
-                        # # If $networkSecurityRuleType = 1, then network security rule is added
-                        # $networkSecurityRuleType = 1
-                        # $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
-                        # if(!($null -eq $networkSecurityRuleCreationStatus)) {
-                        
-                           # Write-Host "Status of Network Security Rule Creation :" $networkSecurityRuleCreationStatus
+                        # Step 6: Call the 'Custom Script Extension' command on the VM for hardening
+                        Write-Host "******************************************************************************************************************************"
+                        Write-Host "STEP 4: Call the 'Custom Script Extension' on Windows VM :" $vm_name
+                        Write-Host "******************************************************************************************************************************"
 
-                            # # Step 5: Call the 'ModifyServiceEndPoints' PS module for adding / configuring service endpoints
-                            # # If $-serviceEndPointsRuleCleanup = 0, then service endpoint is added / configured
-                            # $PreExistingServiceEndPoints = ModifyServiceEndPoints -vmName $vm_name -vmResourceGroupName $vm_resource_group_name -vmRGLocation $vm_rg_location -tempStorageAccount $storageAccountName -tempStorageAccountRGName $rgNameStorageAccount -serviceEndPointsRuleCleanup 0
-                            # #Write-Host "Added / Configured Microsoft.Storage service endpoints for hardening script execution"
+                        Write-Host "Custom Extension Script Name :" $custom_script_extension_name
+                        Write-Host "VM Name :" $vm_name
+                        Write-Host "VM Location :" $vm_rg_location
+                        Write-Host "VM Resource Group :" $vm_resource_group_name
 
-                            # #Write-Host "Pre-existing Service Endpoints string :" $PreExistingServiceEndPoints
+                        try {
 
-                            # if(!($null -eq $PreExistingServiceEndPoints)) {
+                            $StorageKey = (Get-AzStorageAccountKey -ResourceGroupName $rgNameStorageAccount -Name $storageAccountName)| Where-Object {$_.KeyName -eq "key1"}
 
+                            Write-Host 'Str File Uris ::' $strFileUris
 
-                                # Step 6: Call the 'Custom Script Extension' command on the VM for hardening
-                                Write-Host "******************************************************************************************************************************"
-                                Write-Host "STEP 4: Call the 'Custom Script Extension' on Windows VM :" $vm_name
-                                Write-Host "******************************************************************************************************************************"
+                            $fileUri = $strFileUris
 
-                                Write-Host "Custom Extension Script Name :" $custom_script_extension_name
-                                Write-Host "VM Name :" $vm_name
-                                Write-Host "VM Location :" $vm_rg_location
-                                Write-Host "VM Resource Group :" $vm_resource_group_name
+                            $settings = @{
+                                "fileUris" = $fileUri
+                            };
 
-                                try {
+                            $protectedSettings = @{
+                                "storageAccountName" = $storageAccountName;
+                                "storageAccountKey" = $StorageKey.Value;
+                                "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File " +$file_name
+                            };
 
-                                    $StorageKey = (Get-AzStorageAccountKey -ResourceGroupName $rgNameStorageAccount -Name $storageAccountName)| Where-Object {$_.KeyName -eq "key1"}
-
-                                    Write-Host 'Str File Uris ::' $strFileUris
-
-                                    $fileUri = $strFileUris
-
-                                    $settings = @{
-                                        "fileUris" = $fileUri
-                                    };
-
-                                    $protectedSettings = @{
-                                        "storageAccountName" = $storageAccountName;
-                                        "storageAccountKey" = $StorageKey.Value;
-                                        "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File " +$file_name
-                                    };
-
-                                    Set-AzVMExtension -ResourceGroupName $vm_resource_group_name `
-                                        -Location $vm_rg_location `
-                                        -VMName $vm_name `
-                                        -Name $custom_script_extension_name `
-                                        -Publisher "Microsoft.Compute" `
-                                        -ExtensionType "CustomScriptExtension" `
-                                        -TypeHandlerVersion "1.10" `
-                                        -Settings $settings `
-                                        -ProtectedSettings $protectedSettings
-                                }
-                                catch {
-                                    Write-Error 'Error in executing Custom Script Extension for VM ' $vm_name ' :'  $_.Exception.Message
-                                }
-                            # }
-                            # else {
-                            #     Write-Host "Pre-existing service endpoints is null"
-                            #     Write-Host "Error in configuring Service Endpoint for the VM $vm_name and Storage Account $storageAccountName"
-                            # }
-                        # }
-                        # else {
-                        #     Write-Host 'Error creating Network Security Rule to Deny outbound internet. Hardeining failed for VM :' $vm_name
-                        # }
-
-                        # # Step 7: Remove the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
-                        # # If $networkSecurityRuleType = 0, then network security rule is removed
-                        # $networkSecurityRuleType = 0
-                        # $networkSecurityRuleCreationStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -nsgInternetRuleName $nsgInternetRuleName -nsgAzureCloudRuleName $nsgAzureCloudRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
-                        # Write-Host "Status of Network Security Removal :" $networkSecurityRuleDeletionStatus
-
-                        # # Step 8: Call the 'ModifyServiceEndPoints' PS module for rollback (deleting/cleanup) of service endpoint added via this workflow / script
-                        # # If $-serviceEndPointsRuleCleanup = 1, then service endpoint is rolled-back / deleted / cleaned.
-                        # # $PreExistingServiceEndPoints object conatin the list of service endpoinst which needs to be rolled-back
-
-                        # $storageServiceEndpointsExists = $false
-                        # foreach ($PreExistingServiceEndPoint in $PreExistingServiceEndPoints) {
-                        #     Write-Host "Pre-existing Service Endpoint Name received in main CSE script :" $PreExistingServiceEndPoint.Service
-                        #     if('Microsoft.Storage' -eq $PreExistingServiceEndPoint.Service){
-                        #         $storageServiceEndpointsExists = $true
-                        #         break;
-                        #     }
-                        # }
-
-                        # # Code to call the ModifyServiceEndPoints module for rollback of service endpoints, only if modification were done as part of this workflow / script
-                        # if($false -eq $storageServiceEndpointsExists) {
-                        #     Write-Host "Calling ModifyServiceEndPoints module to rollback service endpoints as it added Microsoft.Storage"
-                        #     ModifyServiceEndPoints -vmName $vm_name -vmResourceGroupName $vm_resource_group_name -vmRGLocation $vm_rg_location -tempStorageAccount $storageAccountName -tempStorageAccountRGName $rgNameStorageAccount -serviceEndPointsRuleCleanup 1 -exitingServiceEndpoints $PreExistingServiceEndPoints
-                        # }
-                        # else {
-                        #     Write-Host "Not calling ModifyServiceEndPoints module to rollback as Microsoft.Storage service endpoints already existed"
-                        # }
+                            Set-AzVMExtension -ResourceGroupName $vm_resource_group_name `
+                                -Location $vm_rg_location `
+                                -VMName $vm_name `
+                                -Name $custom_script_extension_name `
+                                -Publisher "Microsoft.Compute" `
+                                -ExtensionType "CustomScriptExtension" `
+                                -TypeHandlerVersion "1.10" `
+                                -Settings $settings `
+                                -ProtectedSettings $protectedSettings
+                        }
+                        catch {
+                            Write-Error 'Error in executing Custom Script Extension for VM ' $vm_name ' :'  $_.Exception.Message
+                        }
 
                     }
                     else {
@@ -241,17 +184,9 @@ try {
                     Write-Host 'Error creating temporary storage account. Hardeining failed for VM :' $vm_name 
                 }
 
-                # # Step 7: Remove the 'Deny Internet Access' network security rule on VM's NSG by calling 'ManageNetworkSecurityRule' PS module
-                # # If $networkSecurityRuleType = 0, then network security rule is removed
-                # $networkSecurityRuleType = 0
-                # $networkSecurityRuleDeletionStatus = ManageNetworkSecurityRules -networkSecurityRuleType $networkSecurityRuleType -networkSecurityRuleName $networkSecurityRuleName -vmName $vm_name -vmResourceGroupName $vm_resource_group_name
-                # Write-Host "Status of Network Security Removal :" $networkSecurityRuleDeletionStatus
-                
                 Write-Host "##############################################################################################################################"
-                #Write-Host "END: Executing Hardening for VM :" $virtualMachines.VMs.VM[$counterVM].Name
+                Write-Host "END: Executing Hardening for VM :" $vm_name
                 Write-Host "##############################################################################################################################"
-                Write-Host -Separator `n
-            #}
         }
         else {
             Write-Error "Error in creating the temporary resource group for storage account. Hardening failed for all VMs."
