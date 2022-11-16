@@ -1,0 +1,84 @@
+# .SYNOPSIS
+#       GitHub Action Workflow to trigger Custom Script Extension on Windows VM.
+# .DESCRIPTION
+#       GitHub Action Workflow to trigger Custom Script Extension on Windows VM.
+# .NOTES
+#       Version: 0.1
+#       Created By: Anil Kumar
+#       Creation Date: 25 May 2022
+#       Modified By: Anil Kumar
+#       Modified Date: 10 Aug 2022
+
+name: Trigger Custom Script Extension Windows VM
+
+# Controls when the workflow will run
+on:
+  #Triggers the workflow on push for the main branch
+  push:
+    branches: [ main ]
+  
+  # Enables the setting to run this workflow manually from the Github Actions tab in browser
+  workflow_dispatch:
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  STORAGE_ACCOUNT_NAME_PREFIX: sa001
+  STORAGE_CONTAINER_NAME_PREFIX: sc001
+  STORAGE_ACCOUNT_RG_NAME: rg-tmp-${{ github.run_id }}-${{ github.run_attempt }}
+  STORAGE_ACCOUNT_RG_LOCATION: westeurope
+  NSG_INTERNET_RULE_NAME_PREFIX: Deny-Out-Internet
+  NSG_AZURE_RULE_NAME_PREFIX: Allow-Out-AzureCloud
+  CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX: 'cse-harden-'
+  REPO_RELATIVE_URL:  '../DevOps-NC' # Update with the relative URL of your forked repo
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "hardening-vm"
+  hardening-vm:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        vm: [{"name":"vmncdevwe001", "location":"westeurope", "rg":"rg-nc-dev-we-001"},{"name":"vmnctestwe002", "location":"westeurope", "rg":"rg-nc-test-we-002"}]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout Repos
+        uses: actions/checkout@v3
+
+      - name: Login via Az module
+        uses: azure/login@v1
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+      
+      - name: Execute Hardening for Windows VMs
+        uses: azure/powershell@v1
+        id: hardeningstep
+        with:
+          inlineScript: |
+            ./02_CustomScriptExtensionWindowsVM/Install-CustomScriptExtension.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineLocation ${{ matrix.vm['location'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -storageAccountNamePrefix ${{ env.STORAGE_ACCOUNT_NAME_PREFIX }} -storageContainerNamePrefix ${{ env.STORAGE_CONTAINER_NAME_PREFIX }} -rgNameStorageAccount ${{ env.STORAGE_ACCOUNT_RG_NAME }} -rgLocationStorageAccount ${{ env.STORAGE_ACCOUNT_RG_LOCATION }} -nsgInternetRuleNamePrefix ${{ env.NSG_INTERNET_RULE_NAME_PREFIX }} -nsgAzureCloudRuleNamePrefix ${{ env.NSG_AZURE_RULE_NAME_PREFIX }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }} -repoRelativeUrl ${{ env.REPO_RELATIVE_URL }}
+          azPSVersion: "latest"
+
+      - name: Check temporary RG name returned from PS script
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            Write-Output 'Temporary RG Name from Script :' ${{ steps.hardeningstep.outputs._rgName }}            
+          azPSVersion: "latest"
+
+      - name: Remove Custom Extension Script for Windows Hardening
+        if: always()
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            ./02_CustomScriptExtensionWindowsVM/Uninstall-CustomScriptExtension.ps1 -virtualMachineName ${{ matrix.vm['name'] }} -virtualMachineResourceGroup ${{ matrix.vm['rg'] }} -cseName ${{ env.CUSTOM_SCRIPT_EXTENSION_NAME_PREFIX }}${{ matrix.vm['name'] }}
+          azPSVersion: "latest"
+      
+      - name: Delete Temporary Resource Group (hosting Storage Accounts, Private Endpoints & Private DNS Zone)
+        if: always()
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            ./02_CustomScriptExtensionWindowsVM/Common/DeleteResourceGroup.ps1 -resourceGroupName ${{ steps.hardeningstep.outputs._rgName }}
+          azPSVersion: "latest"

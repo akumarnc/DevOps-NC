@@ -30,7 +30,7 @@ env:
 
   # Update this to execute respective terraform IaC template using this reusable GitHub Actions workflow.
   # Example './IaC/Win-VM-Provisioning'
-  SOLUTION_FOLDER_PATH: ./IaC/Win-VM-Provisioning
+  SOLUTION_FOLDER_PATH: ./01_IaC/Win-VM-Provisioning
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:

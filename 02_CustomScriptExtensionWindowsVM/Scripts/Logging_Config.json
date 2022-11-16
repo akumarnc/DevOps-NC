@@ -1,0 +1,8 @@
+{
+    "EventsMaxLogSize":{
+            "Application":"4",
+            "System":"4",
+            "Security":"4",
+            "PowerShell":"2"
+        }
+}
