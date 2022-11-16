@@ -15,7 +15,7 @@ name: Trigger Custom Script Extension Windows VM
 on:
   #Triggers the workflow on push for the main branch
   push:
-    branches: [ GitHubActions-ParallelJobs ]
+    branches: [ main ]
   
   # Enables the setting to run this workflow manually from the Github Actions tab in browser
   workflow_dispatch:
