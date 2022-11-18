@@ -39,7 +39,7 @@ jobs:
 
       # Update this to execute respective terraform IaC template using this reusable GitHub Actions workflow.
       # Example './IaC/Win-VM-Provisioning'
-      SOLUTION_FOLDER_PATH: ./IaC/Win-VM-Provisioning
+      SOLUTION_FOLDER_PATH: ./01_IaC/Win-VM-Provisioning
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
